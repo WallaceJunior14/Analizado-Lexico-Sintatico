@@ -53,7 +53,7 @@ EXP ([Ee][+-]?[0-9]+)
 "."?[0-9]+{EXP}? { yylval.d = atof(yytext); return NUMBER; }
 
 "//".*
-[ \t]       /* ignora espaco em branco */
+[ \t\r]+       /* ignora espaco em branco */
 "\\\n"      { printf("c>"); } /* ignora continuacao de linha */
 
 \n      { return EOL; }

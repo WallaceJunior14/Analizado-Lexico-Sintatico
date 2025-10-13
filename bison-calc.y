@@ -31,7 +31,7 @@
 %left '+' '-'
 %left '*' '/'
 
-%type <a> exp stmt list explist
+%type <a> exp stmt list explist command
 %type <sl> symlist
 
 %start calclist
@@ -51,7 +51,10 @@ stmt:       LET NAME '=' exp { $$ = newasgn($2, $4); } /* Atribuição 'let' ret
         ;
 
 list:       /* vazio! */ {$$ = NULL; }
-        |   stmt ';' list { if($1 == NULL) {if ($3 == NULL) $$ = NULL; else $$=$3;} else if ($3==NULL) $$=$1; else $$ = newast('L', $1, $3); }
+        |   stmt ';' list { if ($3==NULL) 
+                        $$=$1; 
+                else 
+                        $$ = newast('L', $1, $3); }
         ;
 
 exp:        exp CMP exp { $$ = newcmp($2, $1, $3); }
@@ -77,6 +80,10 @@ symlist:    NAME { $$ = newsymlist($1, NULL); }
         ;
 
 calclist:   /* vazio! */
-        |   calclist stmt EOL   { if($2) { printf("= %.4g\n>", eval($2)); treefree($2); } }
+        |   calclist command EOL   { if($2) { printf(">= %.4g\n", eval($2)); treefree($2); } }
         |   calclist error EOL  { yyerrok; printf(">"); }
+        ;
+
+command:    stmt          { $$ = $1; } /* Um comando pode ser um stmt simples */
+        |   stmt ';'      { $$ = $1; } /* Ou um stmt seguido por ';' */
         ;

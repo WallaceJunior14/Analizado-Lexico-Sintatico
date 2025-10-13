@@ -425,7 +425,7 @@ extern int yydebug;
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "Uso: %s <arquivo_de_entrada>\n", argv[0]);
+        fprintf(stderr, "Uso: %s <arquivo_de_entrada>\n", argv[1]);
         return 1;
     }
 

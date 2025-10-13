@@ -1,0 +1,33 @@
+<calclist> ::= ε
+             | <calclist> <stmt> EOL
+             | <calclist> error EOL
+
+<list> ::= ε
+         | <stmt> ';' <list>
+
+<stmt> ::= LET NAME '=' <exp>
+         | LET NAME '(' <symlist> ')' '=' <list>
+         | IF <exp> THEN <list>
+         | IF <exp> THEN <list> ELSE <list>
+         | WHILE <exp> DO <list>
+         | FOR '(' <exp> ';' <exp> ';' <exp> ')' <list>
+         | <exp>
+
+<exp> ::= <exp> CMP <exp>
+        | <exp> '+' <exp>
+        | <exp> '-' <exp>
+        | <exp> '*' <exp>
+        | <exp> '/' <exp>
+        | <exp> AND <exp>
+        | <exp> OR <exp>
+        | '(' <exp> ')'
+        | NUMBER
+        | NAME
+        | FUNC '(' <explist> ')'
+        | NAME '(' <explist> ')'
+
+<explist> ::= <exp>
+            | <exp> ',' <explist>
+
+<symlist> ::= NAME
+            | NAME ',' <symlist>
