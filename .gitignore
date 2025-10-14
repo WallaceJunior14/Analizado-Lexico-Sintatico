@@ -1,0 +1,6 @@
+./saidas/*.txt
+
+.bison-calc.lex.c
+.bison-calc.lex.h
+.bison-calc.tab.c
+.bison-calc.tab.h
