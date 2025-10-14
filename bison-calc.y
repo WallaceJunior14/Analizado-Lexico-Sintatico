@@ -80,7 +80,26 @@ symlist:    NAME { $$ = newsymlist($1, NULL); }
         ;
 
 calclist:   /* vazio! */
-        |   calclist command EOL   { if($2) { printf(">= %.4g\n", eval($2)); treefree($2); } }
+        |   calclist command EOL   {
+                if ($2) {
+                    /* Avalia a árvore de comandos */
+                    double result = eval($2);
+                    int nodetype = $2->nodetype;
+
+                    /*
+                     * Imprime o resultado apenas se for uma expressão simples.
+                     * NÃO imprime para atribuições, if, while ou chamadas 'print'
+                     * (pois a 'print' já se imprime sozinha).
+                     */
+                    if (nodetype != '=' && nodetype != 'I' && nodetype != 'W' &&
+                        !(nodetype == 'F' && ((struct fncall *)$2)->functype == B_print) )
+                    {
+                        printf(">= %.4g\n", result);
+                    }
+                    
+                    treefree($2);
+                }
+            }
         |   calclist error EOL  { yyerrok; printf(">"); }
         ;
 

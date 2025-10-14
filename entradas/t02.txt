@@ -1,0 +1,7 @@
+// Teste 2: Atribuição e uso de variáveis
+let a = 5;
+let b = 3;
+a + b;
+a * (b + 2);
+a = a + 10;
+print(a);

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include "bison-calc.h"
+#include <unistd.h>
 
 /* protótipos de y.tab.c */
 int yyparse(void);
@@ -17,6 +18,9 @@ struct symbol symtab[NHASH];
 
 /* Ponteiro de arquivo de entrada para o Flex */
 extern FILE *yyin;
+
+/* Ponteiro para o arquivo de saída, declarado como global para ser acessível */
+FILE *output_file;
 
 /* funcoes em C para TS */
 /* funcao hashing */
@@ -167,39 +171,52 @@ newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *el)
 void
 treefree(struct ast *a)
 {
+    /* Proteção para o caso de um ramo da árvore ser nulo (ex: if sem else) */
+    if (!a) {
+        return;
+    }
+
     switch(a->nodetype) {
-        /* duas subarvores */
-        case '+':
-        case '-':
-        case '*':
-        case '/':
+        /* Nós com DUAS subárvores */
+        case '+': case '-': case '*': case '/':
+        case '&': case '|':
         case '1': case '2': case '3': case '4': case '5': case '6':
         case 'L':
             treefree(a->r);
-
-        /* uma subarvore */
-        case 'C': case 'F':
             treefree(a->l);
-
-        /* sem subarvore */
-        case 'K': case 'N':
             break;
 
-        case '=':
-            free( ((struct symasgn *)a)->v);
+        /* Nós com UMA subárvore */
+        case 'C': /* Chamada de função de usuário */
+        case 'F': /* Chamada de função pré-definida */
+            treefree(a->l);
             break;
 
-        /* acima de 3 subarvores */
-        case 'I': case 'W':
-            free( ((struct flow *)a)->cond);
-            if( ((struct flow *)a)->tl) treefree( ((struct flow *)a)->tl);
-            if( ((struct flow *)a)->el) treefree( ((struct flow *)a)->el);
+        /* Nós FOLHA (sem subárvores para liberar) */
+        case 'K': /* Constante numérica */
+        case 'N': /* Referência a nome/variável */
             break;
 
-        default: printf("erro interno: free bad node %c\n", a->nodetype);
+        /* Nós com estrutura específica */
+        case '=': /* Atribuição */
+            treefree( ((struct symasgn *)a)->v);
+            break;
+
+        case 'I': /* IF */
+        case 'W': /* WHILE */
+            treefree( ((struct flow *)a)->cond);
+            treefree( ((struct flow *)a)->tl);
+            treefree( ((struct flow *)a)->el);
+            break;
+
+        default:
+            printf("erro interno: free bad node %c\n", a->nodetype);
     }
-    free(a); /* sempre libera o proprio no */
+
+    /* Após liberar os filhos, libera o próprio nó */
+    free(a);
 }
+
 
 struct symlist *
 newsymlist(struct symbol *sym, struct symlist *next)
@@ -320,14 +337,14 @@ callbuiltin(struct fncall *f)
     case B_log:
         return log(v);
     case B_print:
-        printf("=%.4g\n", v);
+        // Modificado para usar o arquivo de saída
+        fprintf(output_file, "=%.4g\n", v);
         return v;
     default:
         yyerror("Funcao pre-definida desconhecida %d\n", functype);
         return 0.0;
     }
 }
-
 
 /* funcao definida por usuario*/
 void
@@ -424,8 +441,9 @@ extern int yydebug;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        fprintf(stderr, "Uso: %s <arquivo_de_entrada>\n", argv[1]);
+    // Verifica se os argumentos corretos foram passados
+    if (argc != 3) {
+        fprintf(stderr, "Uso: %s <arquivo_de_entrada> <arquivo_de_saida>\n", argv[0]);
         return 1;
     }
 
@@ -435,14 +453,36 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /* Redireciona a entrada do Flex para o arquivo */
+    // Abre o arquivo de saída para escrita
+    output_file = fopen(argv[2], "w");
+    if (!output_file) {
+        perror(argv[2]);
+        fclose(input_file);
+        return 1;
+    }
+
+    /* Redireciona a entrada do Flex para o arquivo de entrada */
     yyin = input_file;
 
     yydebug = 0;
 
-    /* Chama o parser */
+    /* A mágica acontece aqui: Redefine a saída padrão para o nosso arquivo */
+    /* A função 'fileno' obtém o descritor do arquivo e 'dup2' o duplica para stdout */
+    #if !defined(WIN32) && !defined(_WIN32)
+        dup2(fileno(output_file), STDOUT_FILENO);
+    #else
+        // Para Windows, freopen é uma alternativa mais portável
+        if (freopen(argv[2], "w", stdout) == NULL) {
+            perror("freopen");
+            return 1;
+        }
+    #endif
+
+    /* Chama o parser. Agora todos os printf irão para o arquivo de saída. */
     yyparse();
 
     fclose(input_file);
+    fclose(output_file); // Fecha o arquivo de saída
+    
     return 0;
 }
