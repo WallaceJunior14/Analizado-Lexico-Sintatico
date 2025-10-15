@@ -1,2 +1,2 @@
 let soma(a, b) = a + b;
-soma(10);  // chamada com poucos argumentos
+soma(10);

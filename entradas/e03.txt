@@ -1,2 +1,2 @@
-let x = 5;
-y + 2;   // variável 'y' nunca foi declarada
+x = 5
+print(y + 2)

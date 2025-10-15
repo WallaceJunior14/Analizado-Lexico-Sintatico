@@ -1,11 +1,5 @@
-let i = 0;
-while i < 5 do 
-    print(i);
-    i = i + 1;
-;
-
-let soma = 0;
-for (let j = 0; j < 4; j = j + 1) 
-    soma = soma + j;
-;
-print(soma);
+i = 0
+while i < 10 do i = i + 1; print(i);
+soma = 0
+for (j = 0; j < 4; j = j + 1) soma = soma + j; 
+print(soma)

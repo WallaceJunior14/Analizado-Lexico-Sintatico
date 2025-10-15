@@ -1,17 +1,16 @@
 <calclist> ::= ε
              | <calclist> <stmt> EOL
+             | <calclist> 'LET' 'NAME' '(' <symlist> ')' '=' <list> EOL
              | <calclist> error EOL
+
+<stmt> ::= 'IF' <exp> 'THEN' <list>
+         | 'IF' <exp> 'THEN' <list> 'ELSE' <list>
+         | 'WHILE' <exp> 'DO' <list>
+         | 'FOR' '(' <exp> ';' <exp> ';' <exp> ')' <list>
+         | <exp>
 
 <list> ::= ε
          | <stmt> ';' <list>
-
-<stmt> ::= LET NAME '=' <exp>
-         | LET NAME '(' <symlist> ')' '=' <list>
-         | IF <exp> THEN <list>
-         | IF <exp> THEN <list> ELSE <list>
-         | WHILE <exp> DO <list>
-         | FOR '(' <exp> ';' <exp> ';' <exp> ')' <list>
-         | <exp>
 
 <exp> ::= <exp> CMP <exp>
         | <exp> '+' <exp>
@@ -23,6 +22,7 @@
         | '(' <exp> ')'
         | NUMBER
         | NAME
+        | NAME '=' <exp>
         | FUNC '(' <explist> ')'
         | NAME '(' <explist> ')'
 

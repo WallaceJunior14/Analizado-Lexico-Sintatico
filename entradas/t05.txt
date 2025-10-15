@@ -1,6 +1,5 @@
 let soma(a, b) = a + b;
 let quadrado(x) = x * x;
-
-print(soma(5, 10));
-print(quadrado(4));
-print(soma(quadrado(2), quadrado(3)));
+print(soma(5, 10))
+print(quadrado(4))
+print(soma(quadrado(2), quadrado(3)))

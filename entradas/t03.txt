@@ -1,5 +1,5 @@
-let x = 10;
-let y = 5;
+x = 10
+y = 5
 if x > y then print(x); else print(y);
 if x == 10 then print(1); else print(0);
 if x < y then print(99); else print(100);
