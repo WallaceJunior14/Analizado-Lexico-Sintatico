@@ -1,2 +1,2 @@
 let soma(a, b) = a + b;
-soma(10);
+soma(10)

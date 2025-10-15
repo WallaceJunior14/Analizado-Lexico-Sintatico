@@ -1,2 +1,2 @@
-5 + 3;
-10 $ 4;   // caractere '$' não reconhecido pelo lexer
+5 + 3
+10 $ 4   // caractere '$' não reconhecido pelo lexer
